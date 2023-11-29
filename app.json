@@ -25,6 +25,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d5153a90-4e9c-4d2b-b206-9c5c49080789"
+      }
+    },
+    "owner": "redakarimi"
   }
 }
