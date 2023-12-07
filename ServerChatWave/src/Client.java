@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Client {
@@ -159,27 +161,27 @@ public class Client {
          */
         Integer codiceRicevuto = Integer.parseInt(datoRicevuto.readLine());
         if (codiceRicevuto == 1) {
-           menuChat();
+            menuChat();
         } else {
             System.out.println("Errore 0 : " + codiceRicevuto);
         }
     }
 
-    private void menuChat() throws IOException{
+    private void menuChat() throws IOException {
         System.out.println(
                 "   _____ _    _       ___          __             \r\n" + //
-                "  / ____| |  | |     | \\ \\        / /             \r\n" + //
-                " | |    | |__| | __ _| |\\ \\  /\\  / /_ ___   _____ \r\n" + //
-                " | |    |  __  |/ _` | __\\ \\/  \\/ / _` \\ \\ / / _ \\\r\n" + //
-                " | |____| |  | | (_| | |_ \\  /\\  / (_| |\\ V /  __/\r\n" + //
-                "  \\_____|_|  |_|\\__,_|\\__| \\/  \\/ \\__,_| \\_/ \\___|\r\n" );
+                        "  / ____| |  | |     | \\ \\        / /             \r\n" + //
+                        " | |    | |__| | __ _| |\\ \\  /\\  / /_ ___   _____ \r\n" + //
+                        " | |    |  __  |/ _` | __\\ \\/  \\/ / _` \\ \\ / / _ \\\r\n" + //
+                        " | |____| |  | | (_| | |_ \\  /\\  / (_| |\\ V /  __/\r\n" + //
+                        "  \\_____|_|  |_|\\__,_|\\__| \\/  \\/ \\__,_| \\_/ \\___|\r\n");
         System.out.println("[1] Chatta con qualcuno");
         System.out.println("[0] Esci dall'app");
         System.out.print(">: ");
         int scelta = gestoreInput(0, 1);
         switch (scelta) {
             case 1:
-                comunica("Codice:1");
+                comunica("Codice:3");
                 stampaLista();
                 break;
             case 0:
@@ -193,35 +195,29 @@ public class Client {
         }
     }
 
-    private void stampaLista() throws IOException{
-      /*   System.out.println(
-                "   _____ _    _       ___          __             \r\n" + //
-                "  / ____| |  | |     | \\ \\        / /             \r\n" + //
-                " | |    | |__| | __ _| |\\ \\  /\\  / /_ ___   _____ \r\n" + //
-                " | |    |  __  |/ _` | __\\ \\/  \\/ / _` \\ \\ / / _ \\\r\n" + //
-                " | |____| |  | | (_| | |_ \\  /\\  / (_| |\\ V /  __/\r\n" + //
-                "  \\_____|_|  |_|\\__,_|\\__| \\/  \\/ \\__,_| \\_/ \\___|\r\n" );
-        System.out.println("[1] Chatta con qualcuno");
-        System.out.println("[0] Esci dall'app");
-        System.out.print(">: ");
-        int scelta = gestoreInput(0, 1);
-        switch (scelta) {
-            case 1:
-                comunica("Codice:1");
-                //gioca();
-                break;
-            case 0:
-                comunica("Codice:0");
-                disconnetti();
-                break;
-            default:
-                System.out.println("Valore non valido.");
-                break;
+    private void stampaLista() throws IOException {
+        String stringaNomi = datoRicevuto.readLine();//.replace(nomeDelClient, "");
 
-        } */
+        List<String> nomiUtenti = new ArrayList<>();
+
+        // Dividi la stringa utilizzando il separatore "|"
+        String[] nomi = stringaNomi.split("\\|");
+
+        
+        // Aggiungi i nomi degli utenti alla lista dinamica
+      // Add the names of users to the dynamic list
+      for (int i = 0; i < nomi.length; i++) {
+        if (!nomi[i].isEmpty()) {
+            nomiUtenti.add("["+i+"]" + nomi[i]);
+        }else{
+            nomiUtenti.add("nessun Utente è online in questo momento");
+        }
     }
 
-
+        System.out.println("lista degli utenti attivi:");
+        nomiUtenti.forEach((utente)->System.out.println(utente));
+        
+    }
 
     /**
      * Costruttore della classe Client con indirizzo e porta specificati.
@@ -284,6 +280,6 @@ public class Client {
     public static void main(String[] args) throws IOException {
         Client cliente = new Client();
         cliente.pulisciSchermo();
-        cliente.menuChat();
+        cliente.menu();
     }
-} 
+}

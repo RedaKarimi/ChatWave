@@ -60,7 +60,7 @@ public class Utente extends Thread {
     }
 
     private void chat() {
-        boolean giocoFinito = false;
+/*         boolean giocoFinito = false;
         while (!giocoFinito) {
             inviaMessaggio(String.valueOf(server.gioco.getNumber(numeriIndovinati)));
             if (numeriIndovinati + 1 < server.gioco.getSize()) {
@@ -71,7 +71,7 @@ public class Utente extends Thread {
                 giocoFinito = true;
             }
             server.listaGiocatori.replace(nomeDelGiocatore, String.valueOf(nomeDelGiocatore));
-        }
+        } */
     } 
 
     private void invioListaUtenti() {
