@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -19,6 +20,7 @@ public class Client {
     private BufferedReader datoRicevuto = null;
     private BufferedWriter datoInviato = null;
     private BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+    private List<String> nomiUtenti;
 
     public Client() {
     }
@@ -50,27 +52,60 @@ public class Client {
     }
 
     /**
-     * Gestisce l'input dell'utente.
+     * Metodo per ottenere e gestire l'input utente.
      *
-     * @param min Valore minimo accettabile.
-     * @param max Valore massimo accettabile.
-     * @return Scelta dell'utente.
+     * @param min    Il valore minimo accettato.
+     * @param max    Il valore massimo accettato.
+     * @param custom Opzioni personalizzate aggiuntive.
+     * @return La scelta utente valida.
      */
-    private int gestoreInput(int min, int max) {
-        Integer scelta = null;
+    private String gestoreInput(int min, int max, String... custom) {
+        String scelta = null;
         while (scelta == null) {
             try {
-                scelta = Integer.parseInt(input.readLine());
-                if (scelta < min || scelta > max) {
-                    System.out.println("Errore: il valore inserito non è tra " + min + " e " + max);
+                scelta = input.readLine();
+                int sceltaInt = Integer.parseInt(scelta);
+                if ((sceltaInt < min || sceltaInt > max)) {
+                    // Valore inserito non valido
+                    System.out.print("Errore: il valore inserito non è tra " + min + " e " + max);
+                    if (custom.length > 0) {
+                        System.out.print(", o uno di questi comandi: ");
+                        for (String command : custom) {
+                            System.out.print(command + " ");
+                        }
+                    }
+                    System.out.println();
                     System.out.print(">: ");
-                    scelta = null;
+                    scelta = null; // Resetta la scelta per il nuovo input
                 }
-            } catch (NumberFormatException | IOException e) {
-                System.out.println("Errore: inserisci un valore numerico.");
+            } catch (NumberFormatException e) {
+                // Se l'input non è un numero
+                if ((custom.length > 0 && !Arrays.asList(custom).contains(scelta))) {
+                    System.out.print("Errore: il valore inserito non è tra " + min + " e " + max);
+                    if (custom.length > 0) {
+                        System.out.print(", o uno di questi comandi: ");
+                        for (String command : custom) {
+                            System.out.print(command + " ");
+                        }
+                    }
+                    System.out.println();
+                    System.out.print(">: ");
+                    scelta = null; // Resetta la scelta per il nuovo input
+                }
+            } catch (IOException e) {
+                System.out.print("Errore: il valore inserito non è tra " + min + " e " + max);
+                if (custom.length > 0) {
+                    System.out.print(", o uno di questi comandi: ");
+                    for (String command : custom) {
+                        System.out.print(command + " ");
+                    }
+                }
+                System.out.println();
                 System.out.print(">: ");
+                scelta = null; // Resetta la scelta per il nuovo input
             }
         }
+
         return scelta;
     }
 
@@ -168,6 +203,7 @@ public class Client {
     }
 
     private void menuChat() throws IOException {
+        pulisciSchermo();
         System.out.println(
                 "   _____ _    _       ___          __             \r\n" + //
                         "  / ____| |  | |     | \\ \\        / /             \r\n" + //
@@ -178,13 +214,13 @@ public class Client {
         System.out.println("[1] Chatta con qualcuno");
         System.out.println("[0] Esci dall'app");
         System.out.print(">: ");
-        int scelta = gestoreInput(0, 1);
+        String scelta = gestoreInput(0, 1);
         switch (scelta) {
-            case 1:
+            case "1":
                 comunica("Codice:3");
-                stampaLista();
+                list();
                 break;
-            case 0:
+            case "0":
                 comunica("Codice:0");
                 disconnetti();
                 break;
@@ -195,28 +231,107 @@ public class Client {
         }
     }
 
-    private void stampaLista() throws IOException {
-        String stringaNomi = datoRicevuto.readLine();//.replace(nomeDelClient, "");
+    public void list() throws IOException {
+        stampaLista();
+        System.out.println("vediamo la lista");
+         System.out.println("vediamo la lista");
+        if (nomiUtenti.size() > 0) {
+            System.out.println("[/reload] Ricarica la lista");
+            System.out.println("[/exit] Esci dall'app");
+            System.out.print(">: ");
+            String scelta = gestoreInput(0, nomiUtenti.size(), "/exit", "/reload");
+            if (scelta.equals("/exit")) {
+                comunica("Codice:0");
+                disconnetti();
+            } else if (scelta.equals("/reload")) {
+                comunica("Codice:3");
+                list();
+            } else {
+                for (int i = 0; i < nomiUtenti.size(); i++) {
+                    if (i == Integer.valueOf(scelta)) {
+                        String name = nomiUtenti.get(i);
+                        pulisciSchermo();
+                        chat(name.substring(name.indexOf("]") + 2));
+                    }
+                }
+            }
+        } else {
+            System.out.println("[1] Ricarica la lista");
+            System.out.println("[0] Esci dall'app");
+            System.out.print(">: ");
+            String scelta = gestoreInput(0, 1);
+            switch (scelta) {
+                case "1":
+                    comunica("Codice:3");
+                    list();
+                    break;
+                case "0":
+                    comunica("Codice:0");
+                    disconnetti();
+                    break;
+                default:
+                    System.out.println("Valore non valido.");
+                    break;
 
-        List<String> nomiUtenti = new ArrayList<>();
+            }
+        }
+    }
+    
+    private void chat(String destinatario) throws IOException {
+        pulisciSchermo();
+        System.out.println("Chat con " + destinatario + ", Digita /return per uscire.");
+
+        // Avvia un thread separato per ricevere continuamente i messaggi dal server
+        new Thread(() -> {
+            try {
+                while (connesso) {
+                    String messaggio = datoRicevuto.readLine();
+                    if (messaggio.startsWith("msgDa:")) {
+                        String[] parts = messaggio.split("\\|");
+                        String mittente = parts[0].substring(6);
+                        String msg = parts[1].substring(4);
+                        System.out.println("\t\t\t" + msg + " [" + mittente + "]");
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        // Invia i messaggi di chat al server
+        while (connesso) {
+            String messaggio = input.readLine();
+            if (messaggio.equals("/return")) {
+                menuChat();
+                break;
+            } else {
+                System.out.print("\033[1A\033[K"); // Move up one line and clear the line
+                System.out.println("[" + nomeDelClient + "] " + messaggio);
+                comunica("chatCon:" + destinatario + "|msg:" + messaggio);
+            }
+        }
+    }
+
+    private void stampaLista() throws IOException {
+        System.out.print("technicamente deve stampare la lista");
+        String stringaNomi = datoRicevuto.readLine();
+        System.out.println(stringaNomi);
+        stringaNomi=stringaNomi.replace(nomeDelClient + "|", "");
+        nomiUtenti = new ArrayList<>();
 
         // Dividi la stringa utilizzando il separatore "|"
         String[] nomi = stringaNomi.split("\\|");
 
-        
         // Aggiungi i nomi degli utenti alla lista dinamica
-      // Add the names of users to the dynamic list
-      for (int i = 0; i < nomi.length; i++) {
-        if (!nomi[i].isEmpty()) {
-            nomiUtenti.add("["+i+"]" + nomi[i]);
-        }else{
-            nomiUtenti.add("nessun Utente è online in questo momento");
-        }
-    }
-
         System.out.println("lista degli utenti attivi:");
-        nomiUtenti.forEach((utente)->System.out.println(utente));
-        
+        for (int i = 0; i < nomi.length; i++) {
+            if (!nomi[i].isEmpty()) {
+                nomiUtenti.add("[" + i + "] " + nomi[i]);
+                System.out.println("[" + i + "] " + nomi[i]);
+            } else {
+                System.out.println("nessun utente è online in questo momento");
+            }
+        }
     }
 
     /**
@@ -247,10 +362,10 @@ public class Client {
         System.out.println("[1] Connettiti al server");
         System.out.println("[0] Esci dal programma");
         System.out.print(">: ");
-        int scelta = gestoreInput(0, 1);
+        String scelta = gestoreInput(0, 1);
         switch (scelta) {
-            case 1 -> inizio();
-            case 0 -> System.exit(0);
+            case "1" -> inizio();
+            case "0" -> System.exit(0);
             default -> System.out.println("Valore non valido.");
         }
     }

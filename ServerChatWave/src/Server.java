@@ -14,7 +14,7 @@ public class Server {
     private ServerSocket server;
     private int porta;
 
-    public Map<String, String> listaUtenti;
+    public Map<String, Utente> listaUtenti;
 
     /**
      * Costruttore di default che inizializza il server sulla porta predefinita.
@@ -47,7 +47,7 @@ public class Server {
         Utente utente = new Utente(client, this);
         utente.start();
         System.out.printf("<%s> Si è connesso %n", utente.getNomeDelUtente());
-        listaUtenti.put(utente.getNomeDelUtente(), "0");
+        listaUtenti.put(utente.getNomeDelUtente(), utente);
     }
 
     /**
@@ -69,6 +69,7 @@ public class Server {
      * @param utente utente da rimuovere.
      */
     public void rimuoviUtente(Utente utente) {
+        listaUtenti.remove(utente.getNomeDelUtente());
         System.out.printf("<%s> Si è disconnesso%n", utente.getNomeDelUtente());
     }
 

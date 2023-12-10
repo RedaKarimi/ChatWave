@@ -17,6 +17,7 @@ public class Utente extends Thread {
         try {
             this.dalCliente = new BufferedReader(new InputStreamReader(socketCliente.getInputStream()));
             this.alCliente = new PrintWriter(socketCliente.getOutputStream(), true);
+            this.nomeDelUtente = dalCliente.readLine();
         } catch (IOException e) {
             gestisciEccezioneIO(e, "Errore nella creazione di BufferedReader/PrintWriter");
         }
@@ -30,7 +31,6 @@ public class Utente extends Thread {
     public void run() {
         try {
             inviaMessaggio("1");
-            System.out.println(dalCliente.readLine());
             while (!socketCliente.isClosed()) {
                 if (dalCliente.ready()) {
                     String codiceRicevuto = dalCliente.readLine();
@@ -39,8 +39,6 @@ public class Utente extends Thread {
             }
         } catch (IOException e) {
             gestisciEccezioneIO(e, "Errore nel metodo run");
-        } finally {
-            disconnectUtente();
         }
     }
 
@@ -59,37 +57,29 @@ public class Utente extends Thread {
         }
     }
 
-    private void chat() {
-/*         boolean giocoFinito = false;
-        while (!giocoFinito) {
-            inviaMessaggio(String.valueOf(server.gioco.getNumber(numeriIndovinati)));
-            if (numeriIndovinati + 1 < server.gioco.getSize()) {
-                inviaMessaggio("1");
-                numeriIndovinati++;
-            } else {
-                inviaMessaggio("0");
-                giocoFinito = true;
-            }
-            server.listaGiocatori.replace(nomeDelGiocatore, String.valueOf(nomeDelGiocatore));
-        } */
+    private void invioMessaggio(String desinatario,String messaggio) {
+        Utente utenteDestinatario = server.listaUtenti.get(desinatario);
+        utenteDestinatario.inviaMessaggio("msgDa:"+nomeDelUtente+"|msg:"+messaggio);
     } 
 
     private void invioListaUtenti() {
+        System.out.println("1");
         StringBuilder classifica = new StringBuilder();
-        server.listaUtenti.forEach((giocatore, punti) -> classifica.append(String.format("%s|", giocatore)));
+        System.out.println("2");
+        server.listaUtenti.forEach((nomeUtente, utente) -> classifica.append(String.format("%s|", nomeUtente)));
+        System.out.println("3");
+        System.out.println(classifica.toString());  
         inviaMessaggio(classifica.toString());
     }
 
     private void menu(String scelta) throws IOException {
+        System.out.println(scelta);
         if (scelta.startsWith("Codice:")) {
             int codice = Integer.parseInt(scelta.substring(7));
             switch (codice) {
                 case 0:
                     disconnectUtente();
                     interrupt();
-                    break;
-                case 1:
-                    //chat();
                     break;
                 case 3:
                     invioListaUtenti();
@@ -100,7 +90,13 @@ public class Utente extends Thread {
             }
         } else if (scelta.startsWith("Nome:")) {
             this.nomeDelUtente = scelta.substring(5);
-        }
+        } else if (scelta.startsWith("chatCon:")) {
+            String[] parti = scelta.split("\\|");
+            String destinatario = parti[0].substring(8);
+            String messaggio = parti[1].substring(4);
+            invioMessaggio(destinatario, messaggio);
+        } 
+        
     }
 
     private void gestisciEccezioneIO(IOException e, String messaggio) {
