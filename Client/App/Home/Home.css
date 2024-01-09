@@ -1,0 +1,22 @@
+headerContainer {
+  justify-content: center;
+  align-items: center;
+  background-color: #397af8;
+  margin-bottom: 20;
+  width: 100%;
+}
+heading {
+  color: white;
+  font-size: 22;
+  font-weight: bold;
+}
+headerRight {
+  display: flex;
+  flex-direction: row;
+  margin-top: 5;
+}
+subheaderText {
+  color: white;
+  font-size: 16;
+  font-weight: bold;
+}
