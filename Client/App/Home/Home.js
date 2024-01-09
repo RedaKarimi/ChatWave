@@ -16,17 +16,16 @@ const Home = ({ navigation }) => {
   return (
     <View>
       <Header
-        leftComponent={{
-          icon: "menu",
-          color: "#fff",
-        }}
+      backgroundColor="white"
+        leftComponent={<View style={styles.headerRight}>
+        <TouchableOpacity>
+          <Icon name="menu" color="black" />
+        </TouchableOpacity>
+      </View>}
         rightComponent={
           <View style={styles.headerRight}>
             <TouchableOpacity>
-              <Icon name="description" color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity style={{ marginLeft: 10 }}>
-              <Icon type="antdesign" name="rocket1" color="white" />
+              <Icon type="antdesign"  name="user" color="black" />
             </TouchableOpacity>
           </View>
         }
@@ -53,7 +52,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   heading: {
-    color: "white",
+    color: "black",
     fontSize: 22,
     fontWeight: "bold",
   },

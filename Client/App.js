@@ -8,7 +8,7 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer theme={{colors:"red"}}>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
